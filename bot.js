@@ -9,13 +9,18 @@ require('dotenv').config();
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const Collection = require('@discordjs/collection');
+const ytdl = require('ytdl-core-discord');
 
 client.on('ready', () => {
     console.log('Logged in as ' + client.user.tag);
 });
 
 client.on('message', msg => {
-    if (msg.content == 'test') {
+    if (msg.author.bot) {
+        return;
+    } else if (msg.channel.type == "dm") {
+        return;
+    } else if (msg.content == '!test') {
         msg.react('🤔');        
         (async () => {
             messages = msg.channel.messages;
@@ -35,6 +40,18 @@ client.on('message', msg => {
             });
             msg.delete();            
         })();
+    } else if (msg.content.startsWith('!play')) {
+        msg.react('🏎️');
+        (async () => {
+            const url = msg.content.split(' ')[1];
+            const voice = msg.guild.channels.cache.find(c => c.type === 'voice');
+            const connection = await voice.join();
+            const stream = await ytdl(url);
+            const dispatcher = connection.play(stream, {type: 'opus'});
+            dispatcher.on('end', () => voice.leave());
+            msg.react('🤔');
+        })();
+
     }
 });
 
