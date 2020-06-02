@@ -46,10 +46,14 @@ client.on('message', msg => {
             const url = msg.content.split(' ')[1];
             const voice = msg.guild.channels.cache.find(c => c.type === 'voice');
             const connection = await voice.join();
-            const stream = await ytdl(url, {quality: 'lowestaudio', highWaterMark: 1<<25});
-            const dispatcher = connection.play(stream, {type: 'opus'});
-            dispatcher.on('end', () =>  {
+            const stream = await ytdl(url, {highWaterMark: 1<<25});
+            const dispatcher = connection.play(stream, {type: 'opus', volume: false, highWaterMark: 512});
+            dispatcher.on('finish', () =>  {
                 console.log('end');
+                voice.leave();
+            });
+            dispatcher.on('error', () => {
+                console.log('error');
                 voice.leave();
             });
             msg.react('🤔');
@@ -60,9 +64,13 @@ client.on('message', msg => {
             const voice = msg.guild.channels.cache.find(c => c.type === 'voice');
             const connection = await voice.join();
             try {
-                const dispatcher = connection.play('https://nc.harmonytreehouse.com/s/PAEYSMMKdpWqKrX/download');
-                dispatcher.on('end', () =>  {
+                const dispatcher = connection.play('https://media.discordapp.net/attachments/716572478851252336/717333373235757076/blop_01.mp3');
+                dispatcher.on('finish', () =>  {
                     console.log('end');
+                    voice.leave();
+                });
+                dispatcher.on('error', () => {
+                    console.log('error');
                     voice.leave();
                 });
             } catch (e) {
@@ -78,6 +86,8 @@ client.on('message', msg => {
         if (connection) {
             connection.disconnect();
         }
+    } else {
+        console.log(msg)
     }
 });
 
