@@ -46,12 +46,38 @@ client.on('message', msg => {
             const url = msg.content.split(' ')[1];
             const voice = msg.guild.channels.cache.find(c => c.type === 'voice');
             const connection = await voice.join();
-            const stream = await ytdl(url);
+            const stream = await ytdl(url, {quality: 'lowestaudio', highWaterMark: 1<<25});
             const dispatcher = connection.play(stream, {type: 'opus'});
-            dispatcher.on('end', () => voice.leave());
+            dispatcher.on('end', () =>  {
+                console.log('end');
+                voice.leave();
+            });
             msg.react('🤔');
         })();
 
+    } else if (msg.content == '!mp3') {
+        (async () => {
+            const voice = msg.guild.channels.cache.find(c => c.type === 'voice');
+            const connection = await voice.join();
+            try {
+                const dispatcher = connection.play('https://nc.harmonytreehouse.com/s/PAEYSMMKdpWqKrX/download');
+                dispatcher.on('end', () =>  {
+                    console.log('end');
+                    voice.leave();
+                });
+            } catch (e) {
+                console.log(e);
+            }
+
+            msg.react('🤔');
+        })();
+    } else if (msg.content == '!stop') {
+        msg.react('🏎️');
+
+        let connection = client.guilds.resolve(msg.guild.id).voice.connection;
+        if (connection) {
+            connection.disconnect();
+        }
     }
 });
 
