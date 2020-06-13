@@ -2,6 +2,9 @@
 const Collection = require('@discordjs/collection');
 const PlaylistItem = require('./playlistItem');
 const Playback = require('./playback');
+const { MessageEmbed, Channel } = require('discord.js');
+
+
 
 class Playlist {
 
@@ -29,6 +32,8 @@ class Playlist {
                     this.prev();
                 } else if (msg.content == "!stop") {
                     this.stop();
+                } else if (msg.content == "!list") {
+                    this.list(msg.channel);
                 }
             }
         });
@@ -97,19 +102,50 @@ class Playlist {
         this.next();
     }
 
+    async list(channel) {
+        this.playlist = await this.compilePlaylist(channel);
+        //console.log(this.playlist);
+        //let output = '';
+
+        let embed = new MessageEmbed()
+        .setColor('8888ff')
+        .setTitle('TRACK LIST');
+        if (this.state == 'PLAYING') {
+            let num = Number(this.currentSong) + 1;
+            embed.addField('CURRENTLY PLAYING:', num + '. ' + this.playlist[this.currentSong].toString());
+        }
+        
+        for (let i in this.playlist) {
+            let song = this.playlist[i];
+            let poster = song.originalMessage.author.username;
+            let num = Number(i) + 1;
+            let output = num + '. ' + this.playlist[i].toString();
+            embed.addField(poster, output);
+        }
+
+
+
+        channel.send(embed);
+    }
+
     async compilePlaylist(channel) {
         const messages = await this.getAllMessages(channel);
 
-        let playlist = [];
+        let promises = [];
         messages.forEach(message => {
             let url = this.extractUrlFromMessage(message);
             if (url) {
-                let playlistItem = PlaylistItem.create(url, message);
-                if (playlistItem) {
-                    playlist.push(playlistItem);
-                }
+                promises.push(PlaylistItem.create(url, message));
             }
         });
+        let playlist = [];
+        for (let promise of promises) {
+            let song = await promise;
+            if (song) {
+                playlist.push(song);
+            }
+        }
+
         return playlist;
     }
 
