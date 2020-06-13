@@ -49,13 +49,6 @@ client.on('message', msg => {
 
             msg.react('🤔');
         })();
-    } else if (msg.content == '!stop') {
-        msg.react('🏎️');
-
-        let connection = client.guilds.resolve(msg.guild.id).voice.connection;
-        if (connection) {
-            connection.disconnect();
-        }
     } else if (msg.content == '!flip') {
         msg.channel.send('flipping coin...');
         timeout(3000).then(() => {

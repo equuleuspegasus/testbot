@@ -12,7 +12,8 @@ class PlaylistItem {
         } else if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
             type = 'youtube';
         } else {
-            type = 'unsupported';
+            //type = 'unsupported';
+            return null;
         }
 
         return new PlaylistItem(url, type, originalMessage);

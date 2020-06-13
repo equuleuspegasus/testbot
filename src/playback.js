@@ -2,7 +2,6 @@ const ytdl = require('ytdl-core-discord');
 
 class Playback {
 
-
     constructor(connection) {
         this.connection = connection;
     }
@@ -17,7 +16,8 @@ class Playback {
     }
 
     async unsupported(url) {
-        return true;
+        console.log('unsupported media type');
+        return new Promise(resolve => resolve());
     }
 
     playStream(url, params) {

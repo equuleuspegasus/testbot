@@ -6,6 +6,9 @@ const Playback = require('./playback');
 class Playlist {
 
     client;
+    playlist;
+    currentSong = 0;
+    state = 'STOPPED';
 
     constructor(client) {
         this.client = client;
@@ -15,25 +18,31 @@ class Playlist {
     init() {
         this.client.on('message', msg => {
             if (msg.channel.type != "dm") {
-                if (msg.content == "!play") {
-                    this.play(msg.channel);
-                } else if (msg.content == "!skip") {
-                    this.skip();
+                if (msg.content.startsWith("!play")) {
+                    let parts = msg.content.split(/\s+/);
+                    let index = Number(parts[1]);
+                    index = Number.isNaN(index) ? 0 : index-1;
+                    this.play(msg.channel, index);
+                } else if (msg.content == "!next") {
+                    this.next();
+                } else if (msg.content == "!prev") {
+                    this.prev();
+                } else if (msg.content == "!stop") {
+                    this.stop();
                 }
             }
         });
     }
 
-    async play(channel) {
-        const playlist = await this.compilePlaylist(channel);
+    async play(channel, startAt = 0) {
+        this.playlist = await this.compilePlaylist(channel);
 
         const voice = channel.guild.channels.cache.find(c => c.type === 'voice');
         const connection = await voice.join();
         this.playback = new Playback(connection);
 
-        for (let item of playlist) {
-            await this.playback[item.type](item.url.href);
-        }
+        this.state = 'PLAYING';
+        this.playSong(startAt);
 
         // this.client.user.setPresence({
         //     activity: {
@@ -43,8 +52,49 @@ class Playlist {
         // });
     }
 
+    stopSong() {
+        if (this.playback && this.playback.dispatcher) {
+            this.playback.dispatcher.end();
+        }
+    }
+
+    stop() {
+        if (this.playback) {
+            this.stopSong();
+            this.state = 'STOPPED';
+            this.currentSong = 0;
+            this.playback.connection.disconnect();
+        }
+    }
+
+    async playSong(index) {
+        console.log('play song', index);
+        if (this.playback) {
+            if (index >= 0 && index < this.playlist.length) {
+                this.currentSong = index;
+                let song = this.playlist[index];
+                await this.playback[song.type](song.url.href);
+                this.next();
+            } else {
+                this.stop();
+            }
+        }
+    }
+
+    next() {
+        if (this.currentSong < (this.playlist.length-1)) {
+            this.playSong(this.currentSong + 1);
+        }
+    }
+
+    prev() {
+        if (this.currentSong > 0) {
+            this.playSong(this.currentSong - 1);
+        }
+    }
+
     skip() {
-        this.playback.dispatcher.end();
+        this.next();
     }
 
     async compilePlaylist(channel) {
