@@ -23,12 +23,15 @@ class Playback {
     playStream(url, params) {
         this.dispatcher = this.connection.play(url, params);
         return new Promise((resolve,reject) => {
-            this.dispatcher.on('finish', () =>  {
-                console.log('end');
+            this.dispatcher.on('finish', (e) =>  {
+                console.log('finish:', e);
                 resolve();
             });
-            this.dispatcher.on('error', () => {
-                console.log('error');
+            this.dispatcher.on('end', (e) => {
+                console.log('end:', e);
+            });
+            this.dispatcher.on('error', (e) => {
+                console.log('error:', e);
                 reject();
             });
         });

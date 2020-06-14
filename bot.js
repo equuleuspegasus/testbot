@@ -8,6 +8,8 @@ const timeout = require('./src/timeout');
 const Playback = require('./src/playback');
 const Playlist = require('./src/playlist');
 
+global.__basedir = __dirname;
+
 client.on('ready', () => {
     console.log('Logged in as ' + client.user.tag);
 });

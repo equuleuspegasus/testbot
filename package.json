@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
+    "@tokenizer/http": "^0.5.2",
     "discord.js": "^12.2.0",
     "dotenv": "^8.2.0",
     "music-metadata": "^6.4.0",
