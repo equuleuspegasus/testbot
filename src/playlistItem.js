@@ -4,6 +4,7 @@ const fs = require('fs');
 const ytdl = require('ytdl-core-discord');
 const path = require('path');
 const {makeTokenizer} = require('@tokenizer/http');
+const axios = require('axios');
 
 class PlaylistItem {
 
@@ -53,7 +54,25 @@ class PlaylistItem {
             fileinfo.title = info.title; 
             fileinfo.description = info.description;
             fileinfo.duration = Number(info.length_seconds);
-        } else {
+        } else if (url.hostname.includes('clyp.it')) {
+            type = 'clyp';
+            let response;
+            try { 
+                let apiUrl = `https://api.clyp.it${url.pathname}`;
+                response = await axios.get(apiUrl);
+            } catch(e) {
+                console.log(e);
+                return null;
+            }
+            let data = response.data;
+            fileinfo.title = data.Title;
+            fileinfo.description = data.Description;
+            fileinfo.duration = data.Duration;
+            fileinfo.artist = originalMessage.author.username;
+            fileinfo.img = data.ArtworkPictureUrl;
+        }
+        
+        else {
             //type = 'unsupported';
             return null;
         }
@@ -89,7 +108,7 @@ class PlaylistItem {
     toString() {
         if (this.type == 'file') {
             return `[${this.artist} - ${this.title}](${this.url.href} '${this.type} link') (${this.msDuration()})`;
-        } else if (this.type == 'youtube') {
+        } else if (this.type == 'youtube' || this.type == 'clyp') {
             return `[${this.title}](${this.url.href} '${this.type} link') (${this.msDuration()})`;
         }
     }
@@ -97,7 +116,7 @@ class PlaylistItem {
     toPlainString() {
         if (this.type == 'file') {
             return `${this.artist} - ${this.title}`;
-        } else if (this.type == 'youtube') {
+        } else if (this.type == 'youtube' || this.type == 'clyp') {
             return `${this.title}`;
         }
     }

@@ -125,7 +125,7 @@ class Playlist {
                     await timeout(this.queueSec * 1000);
                 }       
                                 
-                let playback = this.playback[song.type](song.url.href);
+                let playback = this.playback[song.type](song);
 
                 if (!immediate) {
                     await this.textChannel.send(this.getAnnouncement(song, true));

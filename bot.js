@@ -36,7 +36,7 @@ client.on('message', msg => {
             const voice = msg.guild.channels.cache.find(c => c.type === 'voice');
             const connection = await voice.join();
             try {
-                const dispatcher = connection.play('https://media.discordapp.net/attachments/716572478851252336/717333373235757076/blopp_01.mp3');
+                const dispatcher = connection.play('');
                 dispatcher.on('finish', () =>  {
                     console.log('end');
                     voice.leave();

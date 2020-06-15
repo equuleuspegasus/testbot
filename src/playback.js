@@ -1,4 +1,5 @@
 const ytdl = require('ytdl-core-discord');
+const axios = require('axios');
 
 class Playback {
 
@@ -6,16 +7,27 @@ class Playback {
         this.connection = connection;
     }
 
-    async youtube(url) {
-        const stream = await ytdl(url, {highWaterMark: 1<<25});
-        return this.playStream(stream, {type: 'opus', volume: false, highWaterMark: 512});
+    async youtube(song) {
+        const stream = await ytdl(song.url.href, {highWaterMark: 1<<25});
+        return this.playStream(stream, {type: 'opus', volume: false, highWaterMark: 1024});
     }
 
-    async file(url) {
-        return this.playStream(url, {volume: false, highWaterMark: 512});
+    async file(song) {
+        return this.playStream(song.url.href, {volume: false, highWaterMark: 1024});
     }
 
-    async unsupported(url) {
+    async clyp(song) {
+        try { 
+            let apiUrl = `https://api.clyp.it${song.url.pathname}`;
+            let response = await axios.get(apiUrl);
+            return this.playStream(response.data.OggUrl, {volume: false, highWaterMark: 1024});
+        } catch(e) {
+            console.log(e);
+            return new Promise(resolve => resolve());
+        }
+    }
+
+    async unsupported(song) {
         console.log('unsupported media type');
         return new Promise(resolve => resolve());
     }
