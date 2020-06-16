@@ -20,9 +20,9 @@ class Playlist {
     queueColour = "#ff9800";
     nowPlayingColour = "#4caf50";
 
-    announcementSec = 2
-    queueSec = 2;
-    postSongSec = 2;
+    announcementSec = process.env.ANNOUNCE_SEC || 2;
+    queueSec = process.env.QUEUE_SEC || 2;
+    postSongSec = process.env.POST_SONG_SEC || 2;
 
     startPhrases = [
         'STARTING IN', 'COMMENCING IN', 'INITIATING IN', 'COUNTDOWN FOR', 'TAKING OFF IN', 'EMBARKING IN', 'COMMENCEMENT IN', 'COMING AT YOU IN', 'PREPARING TO START IN',
@@ -30,7 +30,8 @@ class Playlist {
         'PREPARE YOURSELVES FOR', 'MANIFESTING IN', 'GET READY FOR', 'PUSH PLAY IN', 'JOINING THE RACE IN', 'T-MINUS', 'ENTERING THE FRAY IN', 'PREPARE FOR LIFT-OFF IN',
         'YOU HAVE', 'HYPE INTENSIFYING FOR', 'STAND BY FOR', 'WASTING', 'QUEUE FOR', 'KICKING UP DUST IN', 'BEGINS IN', 'THE EXPERIENCE BEGINS IN', 'COUNTING DOWN FOR', 'WAITING FOR',
         'START IN', 'ENGINES ON, YOU HAVE', 'TAKING A QUICK BREAK FOR', 'BEGINNING IN', 'AUDIO START IN', 'INCOMING IN', 'PARTYING IN', 'DOING THIS ONE IN', 'HI, MY NAME IS',
-        'ANTICIPATION BUILDING FOR', 'WE WILL START IN', 'WE WILL BEGIN IN', 'HOLD ON FOR', 'THE FUN BEGINS IN',
+        'ANTICIPATION BUILDING FOR', 'WE WILL START IN', 'WE WILL BEGIN IN', 'HOLD ON FOR', 'THE FUN BEGINS IN', 'STOPPING TIME FOR', 'COMMENCING COUNTDOWN:', 'LIFT-OFF IN', 
+        'lower case letters for', 'FOCUSING ENERGY FOR', 'MEDITATING FOR', 'ALLOW', 'PAUSING FOR', 'STARTING UP IN', 'ACTIVATING IN', ''
     ];
 
     constructor(client) {
@@ -101,7 +102,7 @@ class Playlist {
             this.currentSong = 0;
             this.playback.connection.disconnect();
             this.textChannel = null;
-            this.client.user.setPresence({});
+            //this.client.user.setPresence({activity: {}});
         }
     }
 
@@ -118,6 +119,14 @@ class Playlist {
                 this.state = 'INTRO';
                 
                 await this.textChannel.send(this.getAnnouncement(song, immediate));
+
+                this.client.user.setPresence({
+                    activity: {
+                        type: 'LISTENING',
+                        name: song.toPlainString(),
+                        url: song.url.href
+                    }
+                });
                 
                 if (!immediate) {
                     await timeout(this.announcementSec * 1000);
@@ -133,13 +142,7 @@ class Playlist {
 
                 this.state = 'PLAYING';
                 
-                this.client.user.setPresence({
-                    activity: {
-                        type: 'LISTENING',
-                        name: song.toPlainString(),
-                        url: song.url.href
-                    }
-                });
+
                 
                 await playback;
 
@@ -155,10 +158,14 @@ class Playlist {
         let poster = song.originalMessage.author.username;
         let output = this.getSongNo() + '. ' + song.toString();
 
-        let embed = new MessageEmbed()
+        let embed = new MessageEmbed().setThumbnail(song.img)
         .setColor(immediate ? this.nowPlayingColour : this.announceColour)
         .setTitle(immediate ? 'NOW PLAYING' : 'NEXT UP')
         .addField(poster, output);
+        if (!immediate && song.shortDescription()) {
+            embed.addField('Description', song.shortDescription());
+        }
+        
         return embed;
     }
 
@@ -199,9 +206,9 @@ class Playlist {
     }
 
     async list(channel) {
-        if (!this.playlist || !this.playlist.length) {
-            this.playlist = await this.compilePlaylist(channel);
-        }
+        //if (!this.playlist || !this.playlist.length) {
+        this.playlist = await this.compilePlaylist(channel);
+        //}
         //console.log(this.playlist);
         //let output = '';
 

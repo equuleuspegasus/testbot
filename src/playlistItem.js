@@ -5,6 +5,7 @@ const ytdl = require('ytdl-core-discord');
 const path = require('path');
 const {makeTokenizer} = require('@tokenizer/http');
 const axios = require('axios');
+const util = require('util');
 
 class PlaylistItem {
 
@@ -12,10 +13,10 @@ class PlaylistItem {
         this.url = url;
         this.originalMessage = originalMessage;
         this.type = type;
-        this.artist = fileinfo.artist;
-        this.title = fileinfo.title;
-        this.description = fileinfo.description;
-        this.duration = fileinfo.duration;
+
+        Object.keys(fileinfo).forEach((k) => {
+            this[k] = fileinfo[k];
+        })
     }
 
     static async create(url, originalMessage) {
@@ -54,14 +55,22 @@ class PlaylistItem {
             fileinfo.title = info.title; 
             fileinfo.description = info.description;
             fileinfo.duration = Number(info.length_seconds);
+            fileinfo.img = info.author.avatar;
         } else if (url.hostname.includes('clyp.it')) {
             type = 'clyp';
             let response;
-            try { 
-                let apiUrl = `https://api.clyp.it${url.pathname}`;
-                response = await axios.get(apiUrl);
-            } catch(e) {
-                console.log(e);
+            let attempts = 0;
+            while (!response && attempts < 3) {
+                try { 
+                    let apiUrl = `https://api.clyp.it${url.pathname}`;
+                    response = await axios.get(apiUrl);
+                } catch(e) {
+                    console.log(e);
+                    attempts++;
+                }
+            }
+            if (!response) {
+                console.log('failed to get clyp data');
                 return null;
             }
             let data = response.data;
@@ -70,10 +79,40 @@ class PlaylistItem {
             fileinfo.duration = data.Duration;
             fileinfo.artist = originalMessage.author.username;
             fileinfo.img = data.ArtworkPictureUrl;
+            fileinfo.streamUrl = data.OggUrl;
+            let expiry = (new URL(data.OggUrl)).searchParams.Expires;
+            fileinfo.expiry = Number(expiry) * 1000;
+
+        } else if (url.hostname.includes('soundcloud.com')) {
+            type = 'soundcloud';
+
+            let response;
+            let attempts = 0;
+            while (!response && attempts < 3) {
+                try {
+                    let apiUrl = `http://api.soundcloud.com/resolve.json?url=${encodeURIComponent(url.href)}&client_id=${process.env.SC_CLIENT_ID}`;
+                    response = await axios.get(apiUrl);
+                } catch(e) {
+                    console.log(e);
+                    attempts++;
+                }
+            }
+            if (!response) {
+                console.log('failed to get soundcloud data');
+                return null;
+            }
+            let data = response.data;
+            fileinfo.title = data.title;
+            fileinfo.artist = data.user.username;
+            fileinfo.description = data.description;
+            fileinfo.streamUrl = data.stream_url;
+            fileinfo.duration = data.duration / 1000;
+            fileinfo.img = data.artwork_url || data.user.avatar_url; 
+         
         }
         
         else {
-            //type = 'unsupported';
+            console.log('unsupported type');
             return null;
         }
 
@@ -106,18 +145,53 @@ class PlaylistItem {
     }
 
     toString() {
-        if (this.type == 'file') {
-            return `[${this.artist} - ${this.title}](${this.url.href} '${this.type} link') (${this.msDuration()})`;
-        } else if (this.type == 'youtube' || this.type == 'clyp') {
-            return `[${this.title}](${this.url.href} '${this.type} link') (${this.msDuration()})`;
+        switch (this.type) {
+            case 'youtube':
+            case 'clyp':
+                return `[${this.title}](${this.url.href} '${this.url.href}') (${this.msDuration()})`;
+            case 'soundcloud':
+                return `[${this.artist} - ${this.title}](${this.url.href} '${this.url.href}') (${this.msDuration()})`;
+            case 'file':
+            default:
+                return `[${this.artist} - ${this.title}](${this.url.href} '${this.type} link') (${this.msDuration()})`;
+        }
+    }
+
+    shortDescription() {
+        try {
+            let description = this.description;
+            if (!description) {
+                return '';
+            }
+            if (typeof description == 'array') {
+                description = description[0];
+            }
+            if (Array.from(description).length > 280) {
+                description = description.substring(0, 280);
+                console.log(description.match(/(^.*\b)\s\b.*$/));
+                description = description.match(/(^.*\b)\s\b.*$/)[1];
+                description += '...';
+            }
+            return description;
+        } catch (e) {
+            let description = this.description;
+            if (Array.from(description).length > 280) {
+                description = description.substring(0, 280);
+                description += '...';
+            }
+            return description;
         }
     }
 
     toPlainString() {
-        if (this.type == 'file') {
-            return `${this.artist} - ${this.title}`;
-        } else if (this.type == 'youtube' || this.type == 'clyp') {
-            return `${this.title}`;
+        switch (this.type) {
+            case 'youtube':
+            case 'clyp':
+                return `${this.title}`;
+            case 'file':
+            case 'soundcloud':
+            default:
+                return `${this.artist} - ${this.title}`;
         }
     }
 }
