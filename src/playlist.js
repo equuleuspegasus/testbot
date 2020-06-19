@@ -2,9 +2,9 @@
 const Collection = require('@discordjs/collection');
 const PlaylistItem = require('./playlistItem');
 const Playback = require('./playback');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, MessageAttachment } = require('discord.js');
 const timeout = require('./timeout');
-
+const axios = require('axios');
 
 
 class Playlist {
@@ -102,7 +102,7 @@ class Playlist {
             this.currentSong = 0;
             this.playback.connection.disconnect();
             this.textChannel = null;
-            //this.client.user.setPresence({activity: {}});
+            this.client.user.setPresence({clientStatus: 'online'});
         }
     }
 
@@ -141,7 +141,9 @@ class Playlist {
                 }
 
                 this.state = 'PLAYING';
-                
+
+
+                //this.textChannel.send(new MessageAttachment(song.url.href));
 
                 
                 await playback;
