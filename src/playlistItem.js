@@ -168,7 +168,6 @@ class PlaylistItem {
             }
             if (Array.from(description).length > 280) {
                 description = description.substring(0, 280);
-                console.log(description.match(/(^.*\b)\s\b.*$/));
                 description = description.match(/(^.*\b)\s\b.*$/)[1];
                 description += '...';
             }
