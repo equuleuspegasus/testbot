@@ -1,11 +1,8 @@
-
 const Collection = require('@discordjs/collection');
 const PlaylistItem = require('./playlistItem');
 const Playback = require('./playback');
-const { MessageEmbed, MessageAttachment } = require('discord.js');
+const { MessageEmbed } = require('discord.js');
 const timeout = require('./timeout');
-const axios = require('axios');
-
 
 class Playlist {
 
@@ -41,26 +38,35 @@ class Playlist {
 
     init() {
         this.client.on('message', msg => {
-            if (msg.channel.type != "dm") {
-                if (msg.content.startsWith("!play")) {
-                    let parts = msg.content.split(/\s+/);
-                    let index = Number(parts[1]);
-                    index = Number.isNaN(index) ? 0 : index-1;
-                    this.play(msg.channel, index);
-                } else if (msg.content == "!next") {
-                    this.next(true);
-                } else if (msg.content == "!prev") {
-                    this.prev(true);
-                } else if (msg.content == "!stop") {
-                    this.stop();
-                } else if (msg.content == "!list") {
-                    this.list(msg.channel);
-                } else if (msg.content == "!pause") {
-                    this.pause();
-                } else if (msg.content == "!resume") {
-                    this.resume();
-                }
+            if (msg.channel.type == "dm" ||  msg.author.bot) {
+                return;
             }
+            if (msg.content.startsWith("!play")) {
+                msg.react('🏎️');
+                let parts = msg.content.split(/\s+/);
+                let index = Number(parts[1]);
+                index = Number.isNaN(index) ? 0 : index-1;
+                this.play(msg.channel, index);
+            } else if (msg.content == "!next") {
+                msg.react('🏎️');
+                this.next(true);
+            } else if (msg.content == "!prev") {
+                msg.react('🏎️');
+                this.prev(true);
+            } else if (msg.content == "!stop") {
+                msg.react('🏎️');
+                this.stop();
+            } else if (msg.content == "!list") {
+                msg.react('🏎️');
+                this.list(msg.channel);
+            } else if (msg.content == "!pause") {
+                msg.react('🏎️');
+                this.pause();
+            } else if (msg.content == "!resume") {
+                msg.react('🏎️');
+                this.resume();
+            }
+            
         });
     }
 
@@ -141,11 +147,8 @@ class Playlist {
                 }
 
                 this.state = 'PLAYING';
-
-
                 //this.textChannel.send(new MessageAttachment(song.url.href));
-
-                
+               
                 await playback;
 
                 await timeout(this.postSongSec * 1000);
@@ -216,7 +219,7 @@ class Playlist {
 
         let embed = new MessageEmbed()
         .setColor(this.announceColour)
-        .setTitle('TRACK LIST');
+        .setTitle('🏎️ TRACK LIST 🏎️');
         
         for (let i in this.playlist) {
             let song = this.playlist[i];
@@ -224,7 +227,7 @@ class Playlist {
             let songNo = Number(i) + 1;
             let output = songNo + '. ' + this.playlist[i].toString();
             if (this.state == 'PLAYING' && i == this.currentSong) {
-                output += ' (NOW PLAYING)';
+                output += ' 🏎️ 🎵';
             }
             embed.addField(poster, output);
         }
