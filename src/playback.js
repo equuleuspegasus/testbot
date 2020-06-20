@@ -9,11 +9,11 @@ class Playback {
 
     async youtube(song) {
         const stream = await ytdl(song.url.href, {highWaterMark: 1<<25});
-        return this.playStream(stream, {type: 'opus', volume: false, highWaterMark: 256});
+        return this.playStream(stream, {type: 'opus', volume: false, highWaterMark: 256, fec: true});
     }
 
     async file(song) {
-        return this.playStream(song.url.href, {volume: false, highWaterMark: 256});
+        return this.playStream(song.url.href, {volume: false, highWaterMark: 256, fec: true});
     }
 
     async clyp(song) {
@@ -38,10 +38,10 @@ class Playback {
         }
 
         try {
-            return this.playStream(song.streamUrl, {volume: false, highWaterMark: 256});
+            return this.playStream(song.streamUrl, {volume: false, highWaterMark: 256, fec: true});
         } catch(e) {
             song = refreshClypData(song);
-            return this.playStream(song.streamUrl, {volume: false, highWaterMark: 256});
+            return this.playStream(song.streamUrl, {volume: false, highWaterMark: 256, fec: true});
 
         }
     }
