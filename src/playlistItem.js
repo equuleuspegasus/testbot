@@ -23,7 +23,7 @@ class PlaylistItem {
         let type;
         let p = url.pathname;
         let fileinfo = {};
-        if (p.endsWith('.mp3') || p.endsWith('.ogg') || p.endsWith('.aac') || p.endsWith('.webm') || p.endsWith('download')) {
+        if (p.endsWith('.mp3') || p.endsWith('.ogg') || p.endsWith('.aac') || p.endsWith('.webm') || true) {
             type = 'file';
             let httpTokenizer;
             try {
@@ -45,12 +45,12 @@ class PlaylistItem {
             }
             if (!metadata) {
                 // probably not an audio file
+                console.log('audio not found');
                 return null;
             }
 
-
             fileinfo.artist = metadata.common.artist || metadata.common.albumartist || originalMessage.author.username;
-            fileinfo.title = metadata.common.title || originalMessage.attachments.first().name;
+            fileinfo.title = metadata.common.title || 'untitled';//originalMessage.attachments.first().name;
             fileinfo.description = metadata.comment;
             fileinfo.duration = metadata.format.duration;
 
