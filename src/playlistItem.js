@@ -23,38 +23,7 @@ class PlaylistItem {
         let type;
         let p = url.pathname;
         let fileinfo = {};
-        if (p.endsWith('.mp3') || p.endsWith('.ogg') || p.endsWith('.aac') || p.endsWith('.webm') || true) {
-            type = 'file';
-            let httpTokenizer;
-            try {
-                httpTokenizer = await makeTokenizer(url.href);
-            } catch (e) {
-                console.log(e);
-                return null;
-            }
-            let metadata;
-            let attempts = 0;
-            while (!metadata && attempts < 3) {
-                try {
-                    metadata = await mm.parseFromTokenizer(httpTokenizer);
-                    break;
-                } catch(e) {
-                    console.log(e);
-                    attempts++;
-                }
-            }
-            if (!metadata) {
-                // probably not an audio file
-                console.log('audio not found');
-                return null;
-            }
-
-            fileinfo.artist = metadata.common.artist || metadata.common.albumartist || originalMessage.author.username;
-            fileinfo.title = metadata.common.title || 'untitled';//originalMessage.attachments.first().name;
-            fileinfo.description = metadata.comment;
-            fileinfo.duration = metadata.format.duration;
-
-        } else if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
+        if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
             type = 'youtube';
             let info = await ytdl.getBasicInfo(url.href);
             fileinfo.title = info.title; 
@@ -114,12 +83,39 @@ class PlaylistItem {
             fileinfo.duration = data.duration / 1000;
             fileinfo.img = data.artwork_url || data.user.avatar_url; 
          
+        } else {
+            type = 'file';
+            let httpTokenizer;
+            try {
+                httpTokenizer = await makeTokenizer(url.href);
+            } catch (e) {
+                console.log(e);
+                return null;
+            }
+            let metadata;
+            let attempts = 0;
+            while (!metadata && attempts < 3) {
+                try {
+                    metadata = await mm.parseFromTokenizer(httpTokenizer);
+                    break;
+                } catch(e) {
+                    console.log(e);
+                    attempts++;
+                }
+            }
+            if (!metadata) {
+                // probably not an audio file
+                console.log('audio not found');
+                return null;
+            }
+
+            fileinfo.artist = metadata.common.artist || metadata.common.albumartist || originalMessage.author.username;
+            fileinfo.title = metadata.common.title || 'untitled';//originalMessage.attachments.first().name;
+            fileinfo.description = metadata.comment;
+            fileinfo.duration = metadata.format.duration;
+
         }
         
-        else {
-            console.log('unsupported type');
-            return null;
-        }
 
         return new PlaylistItem(url, type, fileinfo, originalMessage);
     }
