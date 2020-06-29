@@ -1,6 +1,7 @@
 const ytdl = require('ytdl-core-discord');
 const axios = require('axios');
 const fs = require('fs');
+const path = require('path');
 
 class Playback {
 
@@ -15,10 +16,15 @@ class Playback {
 
     async file(song) {
         try {
-            let filename = './temp';
+            let filename = path.resolve(__basedir, './temp');
             let temp = fs.createWriteStream(filename, {autoClose: true});
             let response = await axios({method: 'get', url: song.url.href, responseType: 'stream'});
             response.data.pipe(temp);
+
+            await new Promise(resolve => {
+                response.data.on('end', resolve);
+            });
+
             return this.playStream(filename, {volume: false, highWaterMark: 256, fec: true});
         } catch (e) {
             console.log('error playing file');
@@ -52,7 +58,6 @@ class Playback {
         } catch(e) {
             song = refreshClypData(song);
             return this.playStream(song.streamUrl, {volume: false, highWaterMark: 256, fec: true});
-
         }
     }
 
