@@ -147,15 +147,12 @@ class Playlist {
                 }
 
                 this.state = 'PLAYING';
-                //this.textChannel.send(new MessageAttachment(song.url.href));
                
                 await playback;
 
                 await timeout(this.postSongSec * 1000);
                 this.next();
-            } else {
-                this.stop();
-            }
+            } 
         }
     }
 
@@ -183,8 +180,12 @@ class Playlist {
     }
 
     next(immediate) {
-        if (this.state == 'PLAYING' && this.currentSong < (this.playlist.length-1)) {
-            this.playSong(this.currentSong + 1, immediate);
+        if (this.state == 'PLAYING') {
+            if (this.currentSong < (this.playlist.length-1)) {
+                this.playSong(this.currentSong + 1, immediate);
+            } else {
+                this.stop();
+            }
         }
     }
 
