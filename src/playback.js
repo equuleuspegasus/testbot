@@ -1,5 +1,6 @@
 const ytdl = require('ytdl-core-discord');
 const axios = require('axios');
+const fs = require('fs');
 
 class Playback {
 
@@ -13,7 +14,16 @@ class Playback {
     }
 
     async file(song) {
-        return this.playStream(song.url.href, {volume: false, highWaterMark: 256, fec: true});
+        try {
+            let filename = './temp';
+            let temp = fs.createWriteStream(filename, {autoClose: true});
+            let response = await axios({method: 'get', url: song.url.href, responseType: 'stream'});
+            response.data.pipe(temp);
+            return this.playStream(filename, {volume: false, highWaterMark: 256, fec: true});
+        } catch (e) {
+            console.log('error playing file');
+            return new Promise(resolve => resolve());
+        }
     }
 
     async clyp(song) {

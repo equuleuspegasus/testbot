@@ -41,6 +41,9 @@ class Playlist {
             if (msg.channel.type == "dm" ||  msg.author.bot) {
                 return;
             }
+            if (process.env.ROLE && !msg.member.roles.cache.some(role => role.name == process.env.ROLE)) {
+                return;
+            }
             if (msg.content.startsWith("!play")) {
                 msg.react('🏎️');
                 let parts = msg.content.split(/\s+/);
@@ -191,7 +194,7 @@ class Playlist {
 
     prev(immediate) {
         if (this.state == 'PLAYING' && this.currentSong > 0) {
-            this.playSong(this.currentSong - 1), immediate;
+            this.playSong(this.currentSong - 1, immediate);
         }
     }
 
