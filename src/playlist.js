@@ -227,7 +227,7 @@ class Playlist {
         
         for (let i in this.playlist) {
             let song = this.playlist[i];
-            let poster = song.originalMessage.author.username;
+            let poster = song.originalMessage.member.nickname || song.originalMessage.author.username;
             let songNo = Number(i) + 1;
             let output = songNo + '. ' + this.playlist[i].toString();
             if (this.state == 'PLAYING' && i == this.currentSong) {

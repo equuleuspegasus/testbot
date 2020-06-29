@@ -109,7 +109,7 @@ class PlaylistItem {
                 return null;
             }
 
-            fileinfo.artist = metadata.common.artist || metadata.common.albumartist || originalMessage.author.username;
+            fileinfo.artist = metadata.common.artist || metadata.common.albumartist || originalMessage.member.nickname || originalMessage.author.username;
             fileinfo.title = metadata.common.title || url.pathname.split('/').pop() || 'untitled'; //originalMessage.attachments.first().name;
             fileinfo.description = metadata.comment;
             fileinfo.duration = metadata.format.duration;
