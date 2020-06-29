@@ -1,0 +1,7 @@
+version: '3.7'
+services:
+    testbot:
+        build: .
+        restart: unless-stopped
+        env_file:
+            - ./bot.env
