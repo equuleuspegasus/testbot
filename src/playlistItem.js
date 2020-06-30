@@ -25,6 +25,15 @@ class PlaylistItem {
         let fileinfo = {};
         if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
             type = 'youtube';
+
+            if (url.hostname.includes('youtu.be')) {
+                let id = url.pathname.replace(/^\/+/, '');
+                if (!id) {
+                    return null;
+                }
+                url = new URL('https://www.youtube.com/watch?v='+id);
+            }
+
             let info = await ytdl.getBasicInfo(url.href);
             fileinfo.title = info.title; 
             fileinfo.description = info.description;
