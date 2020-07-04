@@ -31,6 +31,11 @@ class Playlist {
         'lower case letters for', 'FOCUSING ENERGY FOR', 'MEDITATING FOR', 'ALLOW', 'PAUSING FOR', 'STARTING UP IN', 'ACTIVATING IN', ''
     ];
 
+    emoji = ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟','🅰️','🅱️','🅾️','🔴','🟠','🟡','🟢','🔵','🟣','🟤','⚫','⚪',
+    '🔷','🔶','⬆️','↗️','➡️','↘️','⬇️','↙️','⬅️','↖️','♉','♐','♊','♑','♌','♎','♓','♋','♒','♈','♍','♏','⛎','🐺',
+    '🦊','🦝','🐴','🦄','🐍','🐂','🐏','🦂','🦀','🐉','🐎','🏎️','⚽','⚾','🥎','🏀','🏐','🎹','🎺','🎻','🎬','🎮','🚲','🔥',
+    '💧','🚀','🏁','🌂','🌐','🌎','☀️','🌕','🌘','🌗','🪐','⭐','✨','🌊','🌴','🌳','🌱','🍂','🍁','🌸'];
+
     constructor(client) {
         this.client = client;
         this.init();
@@ -68,8 +73,10 @@ class Playlist {
             } else if (msg.content == "!resume") {
                 msg.react('🏎️');
                 this.resume();
-            }
-            
+            } else if (msg.content == "!vote") {
+                msg.react('🏎️');
+                this.vote(msg.channel);
+            }            
         });
     }
 
@@ -227,16 +234,40 @@ class Playlist {
         
         for (let i in this.playlist) {
             let song = this.playlist[i];
-            let poster = song.originalMessage.member.nickname || song.originalMessage.author.username;
             let songNo = Number(i) + 1;
-            let output = songNo + '. ' + this.playlist[i].toString();
+            let output = `${songNo}. ${song.toString()}`;
             if (this.state == 'PLAYING' && i == this.currentSong) {
                 output += ' 🏎️ 🎵';
             }
-            embed.addField(poster, output);
+            embed.addField(song.getPoster(), output);
         }
 
         channel.send(embed);
+    }
+
+    async vote(channel) {
+        if (!this.playlist || !this.playlist.length) {
+            this.playlist = await this.compilePlaylist(channel);
+        }
+        let embed = new MessageEmbed()
+        .setColor(this.announceColour)
+        .setTitle('🏁 REACT TO VOTE 🏁');
+
+        for (let i in this.playlist) {
+            let song = this.playlist[i];
+            
+            let output = `${this.emoji[i]} ${song.toString()}`;
+            embed.addField(song.getPoster(), output);
+        }
+
+        let msg = await channel.send(embed);
+        for (let i in this.playlist) {
+            await msg.react(this.emoji[i]);
+        }
+    }
+
+    getSongPoster(song) {
+        
     }
 
     async compilePlaylist(channel) {

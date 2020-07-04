@@ -203,6 +203,10 @@ class PlaylistItem {
                 return `${this.artist} - ${this.title}`;
         }
     }
+
+    getPoster() {
+        return this.originalMessage.member.nickname || this.originalMessage.author.username;
+    }
 }
 
 module.exports = PlaylistItem;
