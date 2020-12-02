@@ -13,9 +13,9 @@
     "@discordjs/opus": "^0.3.2",
     "@tokenizer/http": "^0.5.2",
     "axios": "^0.19.2",
-    "discord.js": "^12.2.0",
+    "discord.js": "^12.3.1",
     "dotenv": "^8.2.0",
     "music-metadata": "^6.4.0",
-    "ytdl-core-discord": "^1.2.0"
+    "ytdl-core-discord": "^1.2.3"
   }
 }
