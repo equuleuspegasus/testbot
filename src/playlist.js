@@ -241,10 +241,19 @@ class Playlist {
             if (this.state == 'PLAYING' && i == this.currentSong) {
                 output += ' 🏎️ 🎵';
             }
+
+            if (embed.length > 5000) {
+                await channel.send(embed);
+                embed = new MessageEmbed()
+                .setColor(this.announceColour)
+                .setTitle('🏎️ TRACK LIST (cont) 🏎️');
+            }
+
             embed.addField(song.getPoster(), output);
         }
 
         channel.send(embed);
+
     }
 
     async vote(channel) {
