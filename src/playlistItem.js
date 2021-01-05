@@ -72,7 +72,7 @@ class PlaylistItem {
             fileinfo.title = data.Title;
             fileinfo.description = data.Description;
             fileinfo.duration = data.Duration;
-            fileinfo.artist = originalMessage.author.username;
+            fileinfo.artist = PlaylistItem.getNickname(originalMessage);
             fileinfo.img = data.ArtworkPictureUrl;
             fileinfo.streamUrl = data.OggUrl;
             let expiry = (new URL(data.OggUrl)).searchParams.Expires;
@@ -130,13 +130,17 @@ class PlaylistItem {
                 return null;
             }
 
-            fileinfo.artist = metadata.common.artist || metadata.common.albumartist || originalMessage.member.nickname || originalMessage.author.username;
+            fileinfo.artist = metadata.common.artist || metadata.common.albumartist;
+
+            if (!fileinfo.artist) {
+                fileinfo.artist = PlaylistItem.getNickname(originalMessage);
+            }
+
             fileinfo.title = metadata.common.title || url.pathname.split('/').pop() || 'untitled'; //originalMessage.attachments.first().name;
             fileinfo.description = metadata.comment;
             fileinfo.duration = metadata.format.duration;
 
-        }
-        
+        }        
 
         return new PlaylistItem(url, type, fileinfo, originalMessage);
     }
@@ -154,6 +158,16 @@ class PlaylistItem {
                 return 'audio/aac';
             default:
                 return null;
+        }
+    }
+
+    static getNickname(message) {
+        if (message.member && message.member.nickname) {
+            return message.member.nickname;
+        } else if (message.author && message.author.username) {
+            return message.author.username;
+        } else {
+            return 'unknown';
         }
     }
 
@@ -217,7 +231,7 @@ class PlaylistItem {
     }
 
     getPoster() {
-        return this.originalMessage.member.nickname || this.originalMessage.author.username;
+        return PlaylistItem.getNickname(this.originalMessage);
     }
 }
 
