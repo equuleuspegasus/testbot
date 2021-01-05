@@ -169,7 +169,7 @@ class Playlist {
     }
 
     getAnnouncement(song, immediate) {
-        let poster = song.originalMessage.author.username;
+        let poster = song.getPoster();
         let output = this.getSongNo() + '. ' + song.toString();
 
         let embed = new MessageEmbed().setThumbnail(song.img)

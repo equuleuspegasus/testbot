@@ -21,10 +21,13 @@ class PlaylistItem {
 
     static async create(url, originalMessage) {
         let type;
-        let p = url.pathname;
         let fileinfo = {};
         if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
             type = 'youtube';
+
+            if (url.pathname.startsWith('/channel/') || url.pathname.startsWith('/user/')) {
+                return null;
+            }
 
             if (url.hostname.includes('youtu.be')) {
                 let id = url.pathname.replace(/^\/+/, '');
@@ -34,11 +37,20 @@ class PlaylistItem {
                 url = new URL('https://www.youtube.com/watch?v='+id);
             }
 
-            let info = await ytdl.getBasicInfo(url.href);
+            let info;
+            try {
+                info = await ytdl.getBasicInfo(url.href);
+            } catch (error) {
+                console.log(error);
+                return null;
+            }
+
+            info = info.videoDetails;
+
             fileinfo.title = info.title; 
             fileinfo.description = info.description;
-            fileinfo.duration = Number(info.length_seconds);
-            fileinfo.img = info.author.avatar;
+            fileinfo.duration = Number(info.lengthSeconds);
+            fileinfo.img = info.author.thumbnails[0].url;
         } else if (url.hostname.includes('clyp.it')) {
             type = 'clyp';
             let response;
