@@ -234,15 +234,22 @@ class Playlist {
         .setColor(this.announceColour)
         .setTitle('🏎️ TRACK LIST 🏎️');
         
+        let embedCount = 0;
         for (let i in this.playlist) {
+          
+            embedCount++; 
+
             let song = this.playlist[i];
             let songNo = Number(i) + 1;
             let output = `${songNo}. ${song.toString()}`;
+          
             if (this.state == 'PLAYING' && i == this.currentSong) {
                 output += ' 🏎️ 🎵';
             }
 
-            if (embed.length > 5000) {
+            if (embed.length > 5000 || embedCount > 25) {
+                console.log('length exceeded');
+                embedCount = 0;
                 await channel.send(embed);
                 embed = new MessageEmbed()
                 .setColor(this.announceColour)

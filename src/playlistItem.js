@@ -22,6 +22,24 @@ class PlaylistItem {
     static async create(url, originalMessage) {
         let type;
         let fileinfo = {};
+
+        const tryGetUrl = async (url) => {
+            let response;
+            let attempts = 0;
+            while (!response && attempts < 3) {
+                try { 
+                    response = await axios.get(url);
+                } catch(e) {
+                    console.log(e);
+                    attempts++;
+                }
+            }
+            if (!response) {
+                return null;
+            }
+            return response;
+        }
+
         if (url.hostname.includes('youtube.com') || url.hostname.includes('youtu.be')) {
             type = 'youtube';
 
@@ -53,17 +71,9 @@ class PlaylistItem {
             fileinfo.img = info.author.thumbnails[0].url;
         } else if (url.hostname.includes('clyp.it')) {
             type = 'clyp';
-            let response;
-            let attempts = 0;
-            while (!response && attempts < 3) {
-                try { 
-                    let apiUrl = `https://api.clyp.it${url.pathname}`;
-                    response = await axios.get(apiUrl);
-                } catch(e) {
-                    console.log(e);
-                    attempts++;
-                }
-            }
+
+            let response = await tryGetUrl(`https://api.clyp.it${url.pathname}`);
+
             if (!response) {
                 console.log('failed to get clyp data');
                 return null;
@@ -78,20 +88,33 @@ class PlaylistItem {
             let expiry = (new URL(data.OggUrl)).searchParams.Expires;
             fileinfo.expiry = Number(expiry) * 1000;
 
+        } else if (url.hostname.includes('whyp.it')) {
+            type = 'whyp';
+
+            let slug = url.pathname.split('/').pop();
+            let response = await tryGetUrl(`https://api.whyp.it/api/tracks/${slug}`);
+            if (!response) {
+                console.log('failed to get whyp data');
+                return null;
+            }
+            let data = response.data.track;
+            fileinfo.title = data.title;
+            fileinfo.description = data.description;
+            fileinfo.duration = Number(data.duration);
+            
+            if (data.user) {
+                fileinfo.artist = data.user.username;
+                fileinfo.img = data.user.avatar;
+            } else {
+                fileinfo.artist = PlaylistItem.getNickname(originalMessage);
+            }
+
+            fileinfo.streamUrl = data.audio_url;
+
         } else if (url.hostname.includes('soundcloud.com')) {
             type = 'soundcloud';
 
-            let response;
-            let attempts = 0;
-            while (!response && attempts < 3) {
-                try {
-                    let apiUrl = `http://api.soundcloud.com/resolve.json?url=${encodeURIComponent(url.href)}&client_id=${process.env.SC_CLIENT_ID}`;
-                    response = await axios.get(apiUrl);
-                } catch(e) {
-                    console.log(e);
-                    attempts++;
-                }
-            }
+            let response = await tryGetUrl(`http://api.soundcloud.com/resolve.json?url=${encodeURIComponent(url.href)}&client_id=${process.env.SC_CLIENT_ID}`);
             if (!response) {
                 console.log('failed to get soundcloud data');
                 return null;
@@ -186,6 +209,7 @@ class PlaylistItem {
             case 'clyp':
                 return `[${this.title}](${this.url.href} '${this.url.href}') (${this.msDuration()})`;
             case 'soundcloud':
+            case 'whyp':
                 return `[${this.artist} - ${this.title}](${this.url.href} '${this.url.href}') (${this.msDuration()})`;
             case 'file':
             default:
@@ -225,6 +249,7 @@ class PlaylistItem {
                 return `${this.title}`;
             case 'file':
             case 'soundcloud':
+            case 'whyp':
             default:
                 return `${this.artist} - ${this.title}`;
         }

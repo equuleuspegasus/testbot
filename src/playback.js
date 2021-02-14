@@ -61,6 +61,31 @@ class Playback {
         }
     }
 
+    async whyp(song) {
+        try {
+            let filename = path.resolve(__basedir, './temp');
+            let temp = fs.createWriteStream(filename, {autoClose: true});
+            let response = await axios({
+                method: 'get', 
+                url: song.streamUrl, 
+                responseType: 'stream',
+                headers: {
+                    'Referer': 'https://whyp.it'
+                }
+            });
+            response.data.pipe(temp);
+
+            await new Promise(resolve => {
+                response.data.on('end', resolve);
+            });
+
+            return this.playStream(filename, {volume: false, highWaterMark: 256, fec: true});
+        } catch (e) {
+            console.log('error playing file');
+            return new Promise(resolve => resolve());
+        }
+    }
+
     async soundcloud(song) {
         let url = `${song.streamUrl}?client_id=${process.env.SC_CLIENT_ID}`;
         return this.playStream(url, {volume: false, highWaterMark: 256});
