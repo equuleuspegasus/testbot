@@ -320,10 +320,10 @@ class Playlist {
         });
         let playlist = [];
 
+        this.msgAuthor.send(`Finished scraping URLs, now give me a few more moments to build the playlist.`);
         for (let promise of promises) {
             let song = await promise;
             if (song) {
-                this.msgAuthor.send(`Adding **${song.toPlainString()}** to the playlist!`);
                 playlist.push(song);
             }
         }
