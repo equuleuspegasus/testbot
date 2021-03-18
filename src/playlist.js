@@ -305,7 +305,7 @@ class Playlist {
 
     async compilePlaylist(channel) {
 
-        this.msgAuthor.send('I am going to compile the playlist now!');
+        this.msgAuthor.send('I am going to compile the playlist now! Hang on while I collect all the messages...');
 
         const messages = await this.getAllMessages(channel);
 
@@ -315,7 +315,6 @@ class Playlist {
         messages.forEach(message => {
             let url = this.extractUrlFromMessage(message);
             if (url) {
-                this.msgAuthor.send(`Found URL ${url.href}`);
                 promises.push(PlaylistItem.create(url, message, this.msgAuthor));
             }
         });
@@ -328,7 +327,7 @@ class Playlist {
                 playlist.push(song);
             }
         }
-        this.msgAuthor.send(`Playlist complete! There are **${playlist.length}** entries on the playlist.`);
+        this.msgAuthor.send(`Playlist complete! There are **${playlist.length}** entries.`);
         return playlist;
     }
 

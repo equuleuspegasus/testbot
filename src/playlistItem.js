@@ -60,7 +60,7 @@ class PlaylistItem {
                 info = await ytdl.getBasicInfo(url.href);
             } catch (error) {
                 console.log(error);
-                msgAuthor.send(`couldn't get youtube data from ${url.href}...`);
+                msgAuthor.send(`couldn't get youtube data from \`${url.href}\`...`);
                 return null;
             }
 
@@ -97,7 +97,7 @@ class PlaylistItem {
             let response = await tryGetUrl(`https://api.whyp.it/api/tracks/${slug}`);
             if (!response) {
                 console.log('failed to get whyp data');
-                msgAuthor.send(`couldn't get whyp data from ${url.href}...`);
+                msgAuthor.send(`couldn't get whyp data from \`${url.href}\`...`);
                 return null;
             }
             let data = response.data.track;
@@ -120,7 +120,7 @@ class PlaylistItem {
             let response = await tryGetUrl(`http://api.soundcloud.com/resolve.json?url=${encodeURIComponent(url.href)}&client_id=${process.env.SC_CLIENT_ID}`);
             if (!response) {
                 console.log('failed to get soundcloud data');
-                msgAuthor.send(`couldn't get soundcloud data from ${url.href}...`);
+                msgAuthor.send(`couldn't get soundcloud data from \`${url.href}\`...`);
                 return null;
             }
             let data = response.data;
@@ -154,7 +154,7 @@ class PlaylistItem {
             if (!metadata) {
                 // probably not an audio file
                 console.log('audio not found');
-                msgAuthor.send(`${url.href} doesn't seem to be audio...`);
+                msgAuthor.send(`\`${url.href}\` doesn't seem to be audio...`);
                 return null;
             }
 
