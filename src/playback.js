@@ -5,6 +5,8 @@ const path = require('path');
 
 class Playback {
 
+    bitrate = process.env.BITRATE || 'auto';
+
     constructor(connection) {
         this.connection = connection;
     }
@@ -97,6 +99,7 @@ class Playback {
     }
 
     playStream(url, params) {
+	params.bitrate = this.bitrate;
         this.dispatcher = this.connection.play(url, params);
         return new Promise((resolve,reject) => {
             this.dispatcher.on('finish', () =>  {
