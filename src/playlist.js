@@ -21,6 +21,11 @@ class Playlist {
     queueSec = process.env.QUEUE_SEC || 2;
     postSongSec = process.env.POST_SONG_SEC || 2;
 
+    // dummy author object
+    msgAuthor = {
+        send: str => console.log(str)
+    };
+
     startPhrases = [
         'STARTING IN', 'COMMENCING IN', 'INITIATING IN', 'COUNTDOWN FOR', 'TAKING OFF IN', 'EMBARKING IN', 'COMMENCEMENT IN', 'COMING AT YOU IN', 'PREPARING TO START IN',
         'COME ON AND SLAM AND WELCOME TO THE JAM IN', 'ENTERING THE RACE IN', 'ENTERING IN', 'MAKING NOISE IN', 'REDEFINING MUSIC IN', 'HELL YES IN', 'UNDER WAY IN', 'SIT TIGHT FOR',
@@ -51,6 +56,9 @@ class Playlist {
             if (process.env.ROLE && !msg.member.roles.cache.some(role => role.name == process.env.ROLE)) {
                 return;
             }
+
+            this.msgAuthor = msg.author;
+
             if (msg.content.startsWith("!play")) {
                 msg.react('🏎️');
                 let parts = msg.content.split(/\s+/);
@@ -83,8 +91,10 @@ class Playlist {
     }
 
     async play(channel, startAt = 0) {
+        this.msgAuthor.send('PLAY')
 
-        this.playlist = await this.compilePlaylist(channel);        
+        this.playlist = await this.compilePlaylist(channel);
+        this.msgAuthor.send('Starting playback...');     
 
         await this.stopSong();
 
@@ -226,9 +236,12 @@ class Playlist {
     async list(channel) {
         //if (!this.playlist || !this.playlist.length) {
         this.playlist = await this.compilePlaylist(channel);
+
         //}
         //console.log(this.playlist);
         //let output = '';
+
+        this.msgAuthor.send('Generating playlist embed(s)...');
 
         let embed = new MessageEmbed()
         .setColor(this.announceColour)
@@ -259,7 +272,9 @@ class Playlist {
             embed.addField(song.getPoster(), output);
         }
 
+
         channel.send(embed);
+        this.msgAuthor.send('All done! Happy racing!');
 
     }
 
@@ -289,23 +304,31 @@ class Playlist {
     }
 
     async compilePlaylist(channel) {
+
+        this.msgAuthor.send('I am going to compile the playlist now!');
+
         const messages = await this.getAllMessages(channel);
+
+        this.msgAuthor.send(`Found **${messages.size}** messages in channel ${channel.name}! Searching for URLs...`);
 
         let promises = [];
         messages.forEach(message => {
             let url = this.extractUrlFromMessage(message);
             if (url) {
-                promises.push(PlaylistItem.create(url, message));
+                this.msgAuthor.send(`Found URL ${url.href}`);
+                promises.push(PlaylistItem.create(url, message, this.msgAuthor));
             }
         });
         let playlist = [];
+
         for (let promise of promises) {
             let song = await promise;
             if (song) {
+                this.msgAuthor.send(`Adding **${song.toPlainString()}** to the playlist!`);
                 playlist.push(song);
             }
         }
-
+        this.msgAuthor.send(`Playlist complete! There are **${playlist.length}** entries on the playlist.`);
         return playlist;
     }
 
