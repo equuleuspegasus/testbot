@@ -12,7 +12,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.3.2",
     "@tokenizer/http": "^0.6.1",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
     "music-metadata": "^7.6.2",
