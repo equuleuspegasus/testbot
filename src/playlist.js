@@ -18,6 +18,7 @@ class Playlist {
     nowPlayingColour = "#4caf50";
 
     announcementSec = process.env.ANNOUNCE_SEC || 2;
+    envQueueSec = process.env.QUEUE_SEC || 2;
     queueSec = process.env.QUEUE_SEC || 2;
     postSongSec = process.env.POST_SONG_SEC || 2;
 
@@ -36,7 +37,7 @@ class Playlist {
         'lower case letters for', 'FOCUSING ENERGY FOR', 'MEDITATING FOR', 'ALLOW', 'PAUSING FOR', 'STARTING UP IN', 'ACTIVATION!!! IN', 'DISPENSING FRESH JUICE IN', 'CHAINSAW PIT REOPENING IN',
         'ROTATING FOR', 'RETICULATING SPLINES FOR', 'LAUNCHING THE MISSILES IN', 'DAYDREAMING FOR', 'ROWING A LITTLE BOAT FOR', 'QUARANTINING FOR', 'EXPLAINING THE PLOT FOR',
         'お前はもう死んでいる', 'STUCK IN TIME LOOP FOR', 'OWO             ','MIKU\'S GETTING PUMPED!!! ', 'PLOTTING FOR', 'FIXING BUGS FOR', 'SOFT PIANO CHORDS FOR', 'PLEASE INSERT DISK 2, YOU HAVE',
-	'SYSTEM REBOOT IN', 'HORSE NOISES HAPPENING IN', 'BLOCKING TRAFFIC IN', 'PRETENDING TO BE A GHOST FOR','Hey, I know that today was tough. I know that you’re going through a lot lately, but you have to listen to me. You’re doing fine. You’re amazing, and you are noticed and loved. Keep it up, ok?'
+	'SYSTEM REBOOT IN', 'HORSE NOISES HAPPENING IN', 'BLOCKING TRAFFIC IN', 'PRETENDING TO BE A GHOST FOR','Hey, I know that today was tough. I know that you’re going through a lot lately, but you have to listen to me. You’re doing fine. You’re amazing, and you are noticed and loved. Keep it up, ok?', 'NO FUSS FOR'
     ];
 
     emoji = ['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟','🅰️','🅱️','🅾️','🔴','🟠','🟡','🟢','🔵','🟣','🟤','⚫','⚪',
@@ -135,6 +136,17 @@ class Playlist {
         }
     }
 
+    getQueueSec() {
+        let queueSec = this.envQueueSec * 1;
+        let luckyNumber = Math.random();
+        if (luckyNumber > 0.95) {
+            queueSec += 1;
+        } else if (luckyNumber > 0.99) {
+            queueSec += 2;
+        }
+        return queueSec;
+    }
+
     async playSong(index, immediate) {
         console.log('play song', index);
         // if (this.state == 'PLAYING') {
@@ -146,6 +158,8 @@ class Playlist {
                 let song = this.playlist[index];
 
                 this.state = 'INTRO';
+
+                this.queueSec = this.getQueueSec();
                 
                 await this.textChannel.send(this.getAnnouncement(song, immediate));
 
