@@ -18,6 +18,7 @@ class Playlist {
     nowPlayingColour = "#4caf50";
 
     announcementSec = process.env.ANNOUNCE_SEC || 2;
+    envQueueSec = process.env.QUEUE_SEC || 2;
     queueSec = process.env.QUEUE_SEC || 2;
     postSongSec = process.env.POST_SONG_SEC || 2;
 
@@ -135,6 +136,17 @@ class Playlist {
         }
     }
 
+    queueSec() {
+        let queueSec = this.envQueueSec * 1;
+        let luckyNumber = Math.random();
+        if (luckyNumber > 0.95) {
+            queueSec += 1;
+        } else if (luckyNumber > 0.99) {
+            queueSec += 2;
+        }
+        return queueSec;
+    }
+
     async playSong(index, immediate) {
         console.log('play song', index);
         // if (this.state == 'PLAYING') {
@@ -146,6 +158,8 @@ class Playlist {
                 let song = this.playlist[index];
 
                 this.state = 'INTRO';
+
+                this.queueSec = this.getQueueSec();
                 
                 await this.textChannel.send(this.getAnnouncement(song, immediate));
 
