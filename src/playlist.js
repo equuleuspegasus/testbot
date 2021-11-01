@@ -139,10 +139,10 @@ class Playlist {
     getQueueSec() {
         let queueSec = this.envQueueSec * 1;
         let luckyNumber = Math.random();
-        if (luckyNumber > 0.95) {
-            queueSec += 1;
-        } else if (luckyNumber > 0.99) {
+        if (luckyNumber > 0.99) {
             queueSec += 2;
+        } else if (luckyNumber > 0.95) {
+            queueSec += 1;
         }
         return queueSec;
     }
