@@ -242,6 +242,7 @@ class Playlist {
     }
 
     skip() {
+        this.pause();
         this.next();
     }
 

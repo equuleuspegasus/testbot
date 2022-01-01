@@ -99,7 +99,7 @@ class Playback {
     }
 
     playStream(url, params) {
-	params.bitrate = this.bitrate;
+        params.bitrate = this.bitrate;
         this.dispatcher = this.connection.play(url, params);
         return new Promise((resolve,reject) => {
             this.dispatcher.on('finish', () =>  {
