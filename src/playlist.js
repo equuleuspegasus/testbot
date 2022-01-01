@@ -88,7 +88,10 @@ class Playlist {
             } else if (msg.content == "!vote") {
                 msg.react('🏎️');
                 this.vote(msg.channel);
-            }            
+            } else if (msg.content == "!skip") {
+                msg.react('🏎️');
+                this.skip();
+            }       
         });
     }
 
@@ -221,6 +224,12 @@ class Playlist {
             if (this.currentSong < (this.playlist.length-1)) {
                 this.playSong(this.currentSong + 1, immediate);
             } else {
+                let embed = new MessageEmbed()
+                .setColor(this.announceColour)
+                .setTitle('🏎️ THANK YOU FOR LISTENING, SEE YOU AT THE NEXT RACE 🏎️');
+
+                this.textChannel.send(embed);
+                
                 this.stop();
             }
         }
@@ -260,7 +269,7 @@ class Playlist {
 
         let embed = new MessageEmbed()
         .setColor(this.announceColour)
-        .setTitle('🏎️ TRACK LIST 🏎️');
+        .setTitle("🏎️ WELCOME RACERS 🏎️");
         
         let embedCount = 0;
         for (let i in this.playlist) {
