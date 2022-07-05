@@ -10,7 +10,7 @@
   "author": "EquuleusPegasus",
   "license": "ISC",
   "dependencies": {
-    "@discordjs/opus": "^0.3.2",
+    "@discordjs/opus": "^0.8.0",
     "@tokenizer/http": "^0.6.1",
     "axios": "^0.21.1",
     "discord.js": "^12.5.1",
