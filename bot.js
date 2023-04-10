@@ -1,14 +1,40 @@
-require('dotenv').config();
-const Discord = require('discord.js');
-const client = new Discord.Client();
-const Playlist = require('./src/playlist');
+import dotenv from "dotenv"
+import { Client, GatewayIntentBits, Partials } from "discord.js"
+import { Playlist } from "./src/playlist.js"
+import { emoji, startPhrases } from "./src/flavourtext.js"
+import { fileURLToPath } from "url"
+import { dirname } from "path"
+import { generateDependencyReport } from "@discordjs/voice"
 
-global.__basedir = __dirname;
+console.log(generateDependencyReport())
 
-client.on('ready', () => {
-    console.log('Logged in as ' + client.user.tag);
-});
+dotenv.config()
 
-new Playlist(client);
+const client = new Client({
+    intents: [
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.GuildMessageReactions,
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.DirectMessages,
+        GatewayIntentBits.DirectMessageTyping,
+        GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildVoiceStates,
+    ],
+    partials: [
+        Partials.Channel,
+        Partials.Message,
+        Partials.Reaction,
+        Partials.GuildMember,
+        Partials.User,
+    ],
+})
 
-client.login(process.env.TOKEN);
+global.__basedir = dirname(fileURLToPath(import.meta.url))
+
+client.on("ready", () => {
+    console.log("Logged in as " + client.user.tag)
+})
+
+new Playlist(client, startPhrases, emoji)
+
+client.login(process.env.TOKEN)

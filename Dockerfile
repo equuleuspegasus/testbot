@@ -1,8 +1,8 @@
-FROM node:14 as base
+FROM node:18 as base
 
 WORKDIR /usr/src/app
 
-RUN apt-get update && apt-get install ffmpeg -y
+RUN apt-get update && apt-get install ffmpeg autoconf automake g++ libtool -y
 
 FROM base as deps
 
@@ -12,6 +12,5 @@ RUN npm install
 FROM deps
 
 COPY . .
-
 
 CMD ["npm", "run", "start"];
